@@ -1,0 +1,19 @@
+{
+  "name": "telegramgame",
+  "version": "1.0.0",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.17.1",
+    "firebase": "10.12.2",
+    "node-telegram-bot-api": "^0.53.0",
+    "telegramgame": "file:"
+  },
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}
