@@ -16,6 +16,7 @@ telegramBot.listen(telegramBot.get('port'), () => {
 
 let userAccountCache = {};
 const messageOwners = {};
+const ITEMS_PER_PAGE = 5;
 
 const rarityMultiplier = {
     "Common": 1.0,
@@ -33,7 +34,7 @@ const optsBackToMain = {
     })
 };
 
-bot.onText(/\/starts/, (msg) => {
+bot.onText(/\/play/, (msg) => {
     const userId = msg.from.id;
     const username = msg.from.username;
     const chatId = msg.chat.id;
@@ -57,7 +58,7 @@ bot.onText(/\/starts/, (msg) => {
                         inline_keyboard: [
                             [{ text: 'Daily Bonus', callback_data: 'dailybonus' }],
                             [{ text: 'Shop', callback_data: 'shop' }],
-                            [{ text: 'Items', callback_data: 'items' }],
+                            [{ text: 'Items', callback_data: 'items_page_1' }],
                             [{ text: 'Adventure', callback_data: 'adventure' }],
                             [{ text: 'Inventory', callback_data: 'inventory' }],
                         ]
@@ -237,30 +238,11 @@ bot.on('callback_query', (callbackQuery) => {
                     message_id: messageId
                 });
             });
-    } else if (data === 'items') {
-        getCachedAccount(userId.toString())
-            .then(account => {
-                const items = account.items;
-                let itemsList = 'I tuoi oggetti:\n\n';
-                for (let i = 0; i < items.length; i++) {
-                    itemsList += `Nome: ${items[i].name}\nValore: ${items[i].price}\n\n`;
-                }
+    } else if (data.startsWith('items_page_')) {
 
+        const page = parseInt(data.split('_').pop(), 10);
+        handleItemsCommand(chatId, messageId, userId, page);
 
-                bot.editMessageText(itemsList, {
-                    chat_id: chatId,
-                    message_id: messageId,
-                    reply_markup: optsBackToMain.reply_markup
-                });
-            })
-            .catch(error => {
-                console.log('Errore durante il recupero degli oggetti:', error);
-                bot.editMessageText('Si è verificato un errore durante il recupero degli oggetti. Si prega di riprovare più tardi.', {
-                    chat_id: chatId,
-                    message_id: messageId,
-                    reply_markup: optsBackToMain.reply_markup
-                });
-            });
     } else if (data === 'back_to_main') {
         getCachedAccount(userId.toString())
             .then(account => {
@@ -269,7 +251,7 @@ bot.on('callback_query', (callbackQuery) => {
                         inline_keyboard: [
                             [{ text: 'Daily Bonus', callback_data: 'dailybonus' }],
                             [{ text: 'Shop', callback_data: 'shop' }],
-                            [{ text: 'Items', callback_data: 'items' }],
+                            [{ text: 'Items', callback_data: 'items_page_1' }],
                             [{ text: 'Adventure', callback_data: 'adventure' }],
                             [{ text: 'Inventory', callback_data: 'inventory' }],
                         ]
@@ -483,8 +465,6 @@ bot.on('callback_query', (callbackQuery) => {
                 const world = worldDoc.data();
                 const monster = world.mobs.find(mob => mob.name === monsterName);
     
-    
-               
                 const userHp = account.hp; 
                 const monsterHp = monster.hp;
                 
@@ -497,7 +477,7 @@ bot.on('callback_query', (callbackQuery) => {
                         message_id: messageId,
                     }
                 ).then(sentMessage => {
-                    executeFightCycle(userId, worldId, monsterName, sentMessage.message_id, monsterLevel);
+                    executeFightCycle(userId, worldId, monsterName, sentMessage.message_id, monsterLevel, sentMessage.chat.id);
                 }).catch(error => {
                     console.error("Errore durante l'edit del messaggio:", error);
                 });
@@ -627,7 +607,7 @@ function generateMonster(world) {
 }
 
 
-function executeFightCycle(userId, worldId, monsterName, messageId, monsterLevel) {
+function executeFightCycle(userId, worldId, monsterName, messageId, monsterLevel, chatId) {
     getCachedAccount(userId.toString()).then(account => {
         getDoc(doc(database, `adventures/${worldId}`)).then(worldDoc => {
             const world = worldDoc.data();
@@ -642,17 +622,19 @@ function executeFightCycle(userId, worldId, monsterName, messageId, monsterLevel
             const userAttack = calculateAttack(account);
             const userDefense = calculateDefense(account);
 
+            const chatIdActive = chatId === undefined ? userId : chatId;
+
 
             fightTurn();
 
             function fightTurn() {
                 if (monsterHp <= 0) {
-                    handleVictory(userId, messageId, monster, account, monsterLevel);
+                    handleVictory(userId, messageId, monster, account, monsterLevel, chatIdActive);
                     return;
                 }
 
                 if (userHp <= 0) {
-                    handleDefeat(userId, messageId, monster, monsterLevel);
+                    handleDefeat(userId, messageId, monster, monsterLevel, chatIdActive);
                     return;
                 }
 
@@ -665,10 +647,10 @@ function executeFightCycle(userId, worldId, monsterName, messageId, monsterLevel
                     const monsterDamage = Math.max(0, monsterAttack - userDefense);
                     userHp -= monsterDamage;
                 }
-
+                
 
                 bot.editMessageText(`⚔️ Combattimento contro *${monster.name}*!\n\n👤 *Tu*: ${userHp} HP\n🐉 *${monster.name} (Livello ${monsterLevel})*: ${monsterHp} HP\n\n👊 Hai inflitto ${playerDamage} danni.\n🔥 ${monster.name} ti ha inflitto ${monsterHp > 0 ? monsterAttack - userDefense : 0} danni.`, {
-                    chat_id: userId,
+                    chat_id: chatIdActive,
                     message_id: messageId,
                     parse_mode: "Markdown",
                 }).then(() => {
@@ -696,12 +678,12 @@ function calculateDefense(account) {
     return account.defense + account.helmet.defense + account.chestplate.defense + account.leggings.defense + account.boots.defense;
 }
 
-function handleVictory(userId, messageId, monster, account, monsterLevel) {
+function handleVictory(userId, messageId, monster, account, monsterLevel, chatIdActive) {
     const xpGain = calculateXpGain(account.level, monster, monsterLevel); 
     const drops = calculateDrops(monster.drops);
 
     bot.editMessageText(`🎉 Hai sconfitto *${monster.name} (Level ${monsterLevel})*!\n\n🏆 XP guadagnata: ${xpGain}\n🎁 Oggetti ottenuti: ${drops.map(d => d.name).join(', ') || "Nessuno"}`, {
-        chat_id: userId,
+        chat_id: chatIdActive,
         message_id: messageId,
         parse_mode: "Markdown",
         reply_markup: optsBackToMain.reply_markup
@@ -727,6 +709,7 @@ function handleVictory(userId, messageId, monster, account, monsterLevel) {
         items: [...account.items, ...drops],
     })
         .then(() => {
+            bot.sendMessage(chatIdActive, `🎉 Complimenti ${account.name}! Sei salito al livello ${newLevel}!`);
             console.log(`Aggiornato utente ${account.id}: Livello ${newLevel}, XP ${totalXp}/${newXpTop}`);
             invalidateCache(userId.toString());
         })
@@ -736,7 +719,7 @@ function handleVictory(userId, messageId, monster, account, monsterLevel) {
 }
 
 function calculateXpGain(playerLevel, monster, monsterLevel) {
-
+    monsterLevel = parseInt(monsterLevel);
     const levelDifference = Math.max(0, monsterLevel - playerLevel);
     const baseXp = monster.baseXp;
     const bonusFactor = 10; 
@@ -762,9 +745,9 @@ function calculateDrops(dropsArray) {
     return loot;
 }
 
-function handleDefeat(userId, messageId, monster, monsterLevel) {
+function handleDefeat(userId, messageId, monster, monsterLevel, chatIdActive) {
     bot.editMessageText(`💀 Sei stato sconfitto da *${monster.name} (Livello ${monsterLevel})*!\nProva a potenziarti e riprova la prossima volta.`, {
-        chat_id: userId,
+        chat_id: chatIdActive,
         message_id: messageId,
         parse_mode: "Markdown",
         reply_markup: optsBackToMain.reply_markup
@@ -786,4 +769,56 @@ function invalidateCache(userId) {
     delete userAccountCache[userId];
 }
 
+function paginateItems(items, page) {
+    const start = (page - 1) * ITEMS_PER_PAGE;
+    const end = start + ITEMS_PER_PAGE;
+    return items.slice(start, end);
+}
 
+function createPaginationButtons(currentPage, totalPages) {
+    const buttons = [];
+    if (currentPage > 1) {
+        buttons.push({ text: '⬅️ Precedente', callback_data: `items_page_${currentPage - 1}` });
+    }
+    if (currentPage < totalPages) {
+        buttons.push({ text: '➡️ Successivo', callback_data: `items_page_${currentPage + 1}` });
+    }
+    return buttons;
+}
+
+function handleItemsCommand(chatId, messageId, userId, page = 1) {
+    getCachedAccount(userId.toString())
+        .then(account => {
+            const { items } = account;
+            if (!items || items.length === 0) {
+                return bot.editMessageText('Non hai oggetti.', {
+                    chat_id: chatId,
+                    message_id: messageId,
+                    reply_markup: optsBackToMain.reply_markup
+                });
+            }
+
+            const totalPages = Math.ceil(items.length / ITEMS_PER_PAGE);
+            const paginatedItems = paginateItems(items, page);
+            const itemsList = paginatedItems.map(item => `Nome: ${item.name}\nValore: ${item.price}\n\n`).join('');
+            const message = `I tuoi oggetti (Pagina ${page} di ${totalPages}):\n\n${itemsList}`;
+
+            const paginationButtons = createPaginationButtons(page, totalPages);
+            const replyMarkup = JSON.parse(optsBackToMain.reply_markup);
+            replyMarkup.inline_keyboard = [paginationButtons, ...replyMarkup.inline_keyboard];
+
+            bot.editMessageText(message, {
+                chat_id: chatId,
+                message_id: messageId,
+                reply_markup: replyMarkup
+            });
+        })
+        .catch(error => {
+                console.log('Errore durante il recupero degli oggetti:', error);
+                bot.editMessageText('Si è verificato un errore durante il recupero degli oggetti. Si prega di riprovare più tardi.', {
+                    chat_id: chatId,
+                    message_id: messageId,
+                    reply_markup: optsBackToMain.reply_markup
+                });
+            });;
+}
