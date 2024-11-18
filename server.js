@@ -18,6 +18,14 @@ let userAccountCache = {};
 const messageOwners = {};
 const ITEMS_PER_PAGE = 5;
 
+const defaultEquipment = {
+    helmet: { name: "Nessun elmo", defense: 0, equip: true, effect: "HELMET" },
+    chestplate: { name: "Nessuna corazza", defense: 0, equip: true, effect: "CHESTPLATE" },
+    leggings: { name: "Nessun pantalone", defense: 0, equip: true, effect: "LEGGINGS" },
+    boots: { name: "Nessun stivale", defense: 0, equip: true, effect: "BOOTS" },
+    weapon: { name: "Pugno", attack: 5, equip: true, effect: "WEAPON" }
+};
+
 const rarityMultiplier = {
     "Common": 1.0,
     "Uncommon": 1.2,
@@ -199,7 +207,7 @@ bot.on('callback_query', (callbackQuery) => {
                             const newCoins = account.coins - shopItem.price;
                             updateDoc(doc(database, `users/${account.id}`), {
                                 coins: newCoins,
-                                items: [...account.items, { name: shopItem.name, price: shopItem.price }]
+                                items: [...account.items, { ...shopItem}]
                             })
                                 .then(() => {
                                     invalidateCache(userId.toString());
@@ -277,11 +285,11 @@ bot.on('callback_query', (callbackQuery) => {
                 const opts = {
                     reply_markup: JSON.stringify({
                         inline_keyboard: [
-                            [{ text: `${account.helmet.name}`, callback_data: 'equip_helmet' }],
-                            [{ text: `${account.chestplate.name}`, callback_data: 'equip_chestplate' }],
-                            [{ text: `${account.leggings.name}`, callback_data: 'equip_leggings' }],
-                            [{ text: `${account.boots.name}`, callback_data: 'equip_boots' }],
-                            [{ text: `${account.weapon.name}`, callback_data: 'equip_weapon' }],
+                            [{ text: `${account.helmet.name} (+${account.helmet.defense}DEF)`, callback_data: 'equip_helmet' }],
+                            [{ text: `${account.chestplate.name} (+${account.chestplate.defense}DEF)`, callback_data: 'equip_chestplate' }],
+                            [{ text: `${account.leggings.name} (+${account.leggings.defense}DEF)`, callback_data: 'equip_leggings' }],
+                            [{ text: `${account.boots.name} (+${account.boots.defense}DEF)`, callback_data: 'equip_boots' }],
+                            [{ text: `${account.weapon.name} (+${account.weapon.attack}ATK)`, callback_data: 'equip_weapon' }],
                             [{ text: 'Back', callback_data: 'back_to_main' }]
                         ]
                     })
@@ -304,8 +312,17 @@ bot.on('callback_query', (callbackQuery) => {
         getCachedAccount(userId.toString())
             .then(account => {
 
-                const equipDefault = account[equipment] && account[equipment].effect === equipment.toUpperCase();
+                const equipDefault = account[equipment]
                 const equips = account.items.filter(i => i.effect === equipment.toUpperCase());
+
+                if (equipDefault.name != defaultEquipment[equipment].name) {
+                    equips.push({
+                        ...defaultEquipment[equipment],
+                        equip: false
+                    });
+                }
+
+
 
                 const equipArray = equipDefault ? [account[equipment], ...equips] : equips;
 
@@ -316,7 +333,7 @@ bot.on('callback_query', (callbackQuery) => {
                     reply_markup: JSON.stringify({
                         inline_keyboard: equipArray.map(i => [{
                             text: i.equip === true ? `✅ ${i.name}` : i.name,
-                            callback_data: i.equip === true ? `already_equipped_${i.name}` : `equip_${equipment}_${i.id}`
+                            callback_data: i.equip === true ? `already_equipped_${i.name}` : `equipaction_${equipment}_${i.name}`
                         }]).concat([[{ text: 'Torna all\'inventario', callback_data: 'inventory' }]])
                     })
                 });
@@ -331,6 +348,57 @@ bot.on('callback_query', (callbackQuery) => {
 
 
 
+            })
+            .catch(error => {
+                console.log('Errore durante il recupero dell\'account:', error);
+                bot.editMessageText('Si è verificato un errore durante il recupero dell\'account. Si prega di riprovare più tardi.', {
+                    chat_id: chatId,
+                    message_id: messageId
+                });
+            });
+    } else if (data.startsWith("equipaction_")) {
+        const equipment = data.split("_")[1];
+        const itemName = data.split("_")[2];
+        getCachedAccount(userId.toString())
+            .then(account => {
+                let item = account.items.find(i => i.name === itemName);
+                if (!item) {
+                    item = defaultEquipment[equipment];
+                }
+                const oldEquipment = account[equipment];
+                let newEquipment = {};
+                if ('attack' in item) {
+                    newEquipment = { name: item.name, attack: item.attack, equip: true, effect: item.effect, ...(item.price && { price: item.price }) };
+                } else if ('defense' in item) {
+                    newEquipment = { name: item.name, defense: item.defense, equip: true, effect: item.effect, ...(item.price && { price: item.price }) };
+                }
+
+                const newItems = account.items.filter(i => i.name !== itemName);
+                if (oldEquipment.name != defaultEquipment[equipment].name) {
+                    oldEquipment.equip = false;
+                    newItems.push(oldEquipment);
+                }
+
+                updateDoc(doc(database, `users/${account.id}`), {
+                    [equipment]: newEquipment,
+                    items: newItems
+                })
+                    .then(() => {
+                        invalidateCache(userId.toString());
+                        bot.editMessageText(`Hai equipaggiato ${itemName} come ${equipment}!`, {
+                            chat_id: chatId,
+                            message_id: messageId,
+                            reply_markup: optsBackToMain.reply_markup
+                        });
+                    })
+                    .catch(error => {
+                        console.log('Errore durante l\'equipaggiamento dell\'oggetto:', error);
+                        bot.editMessageText('Si è verificato un errore durante l\'equipaggiamento dell\'oggetto. Si prega di riprovare più tardi.', {
+                            chat_id: chatId,
+                            message_id: messageId,
+                            reply_markup: optsBackToMain.reply_markup
+                        });
+                    });
             })
             .catch(error => {
                 console.log('Errore durante il recupero dell\'account:', error);
@@ -556,11 +624,7 @@ function createAccount(telegramUserId, telegramUsername) {
             hp: 100,
             attack: 1,
             defense: 1,
-            helmet: { name: "Nessun elmo", defense: 0, equip: true, effect: "HELMET" },
-            chestplate: { name: "Nessuna corazza", defense: 0, equip: true, effect: "CHESTPLATE" },
-            leggings: { name: "Nessun pantalone", defense: 0, equip: true, effect: "LEGGINGS" },
-            boots: { name: "Nessun stivale", defense: 0, equip: true, effect: "BOOTS" },
-            weapon: { name: "Pugno", attack: 5, equip: true, effect: "WEAPON" },
+            ...defaultEquipment
         })
             .then(() => {
                 console.log('Account creato con successo per', telegramUsername);
@@ -703,7 +767,7 @@ function executeFightCycle(userId, worldId, monsterName, messageId, monsterLevel
                     parse_mode: "Markdown",
                 }).then(() => {
 
-                    setTimeout(fightTurn, 2000);
+                    setTimeout(fightTurn, 5000);
                 }).catch(error => {
                     console.error("Errore durante l'editing del messaggio:", error);
                 });
