@@ -33,6 +33,13 @@ const rarityMultiplier = {
     "Epic": 2.0
 };
 
+const raritySpawnChance = {
+    "Common": 10.0,
+    "Uncommon": 5.0,
+    "Rare": 2.0,
+    "Epic": 1.0
+};
+
 const optsBackToMain = {
     reply_markup: JSON.stringify({
         inline_keyboard: [[{
@@ -42,7 +49,162 @@ const optsBackToMain = {
     })
 };
 
+const adventureData = {
+    place: "Montagna gelida",
+    requiredLevel: 10,
+    img: "",
+    description: "",
+    mobs: [
+      {
+        name: "Orco gelato",
+        attack: 50,
+        defense: 100,
+        hp: 100,
+        rarity: "Common",
+        baseXp: 40,
+        img: "",
+        drops: [
+          {
+            name: "Mazza ghiacciata",
+            effect: "WEAPON",
+            attack: 52,
+            price: 30,
+            rarity: 90
+          },
+          {
+            name: "Palla di Neve",
+            effect: "",
+            price: 5,
+            rarity: 5
+          },
+            {
+                name: "Gelato al cioccolato",
+                effect: "",
+                price: 10,
+                rarity: 20
+            },
+            {
+                name: "Pelle di orco",
+                effect: "",
+                price: 40,
+                rarity: 60
+            }
+
+        ]
+      },
+      {
+        name: "Lupo delle nevi",
+        attack: 70,
+        defense: 120,
+        hp: 200,
+        rarity: "Uncommon",
+        baseXp: 60,
+        img: "",
+        drops: [
+          {
+            name: "Zanna di lupo",
+            effect: "WEAPON",
+            price: 50,
+            rarity: 90,
+            attack: 80
+          },
+          {
+            name: "Pietra di ghiaccio",
+            effect: "",
+            price: 20,
+            rarity: 40
+          },
+          {
+            name: "Pelle di lupo",
+            effect: "",
+            price: 60,
+            rarity: 70
+          }
+        ]
+      },
+      {
+        name: "Yeti",
+        attack: 120,
+        defense: 100,
+        hp: 300,
+        rarity: "Rare",
+        baseXp: 80,
+        img: "",
+        drops: [
+          {
+            name: "Artiglio del yeti",
+            effect: "WEAPON",
+            price: 150,
+            rarity: 95,
+            attack: 110
+          },
+          {
+            name: "Pelo dello yeti",
+            effect: "",
+            price: 200,
+            rarity: 80
+          },
+          {
+             name: "Muco",
+             effect: "",
+             price: 10,
+             rarity: 30
+          }
+
+
+        ]
+      },
+        {
+            name: "Regina del Ghiaccio",
+            attack: 300,
+            defense: 150,
+            hp: 300,
+            rarity: "Epic",
+            baseXp: 200,
+            img: "",
+            drops: [
+            {
+                name: "Scettro glaciale",
+                effect: "WEAPON",
+                price: 300,
+                rarity: 100,
+                attack: 200
+            },
+            {
+                name: "Corona di ghiaccio",
+                effect: "HELMET",
+                price: 200,
+                rarity: 100,
+                defense: 200
+            },
+            {
+                name: "Corazza di ghiaccio",
+                effect: "CHESTPLATE",
+                price: 200,
+                rarity: 100,
+                defense: 200
+            },
+            {
+                name: "Pantaloni di ghiaccio",
+                effect: "LEGGINGS",
+                price: 200,
+                rarity: 100,
+                defense: 200
+            },
+            {
+                name: "Stivali di ghiaccio",
+                effect: "BOOTS",
+                price: 200,
+                rarity: 100,
+                defense: 200
+            }
+            ]
+        }
+    ]
+  };
+
 bot.onText(/\/update/, (msg) => {
+    //createAdventure(adventureData)
 });
 
 bot.onText(/\/play/, (msg) => {
@@ -73,7 +235,7 @@ bot.onText(/\/play/, (msg) => {
                         ]
                     })
                 };
-                bot.sendMessage(chatId, `Bentornato ${account.username}!\nLivello: ${account.level}\nCoins: ${account.coins}`, opts)
+                bot.sendMessage(chatId, `Bentornato ${account.username}!\nLivello: ${account.level}\nExp: ${account.xp}/${account.xpTop}\nCoins: ${account.coins}`, opts)
                     .then(sentMessage => {
                         messageOwners[sentMessage.message_id] = userId;
                     });
@@ -257,7 +419,8 @@ bot.on('callback_query', (callbackQuery) => {
                         } else {
                             bot.editMessageText('Non hai abbastanza coins per acquistare questo oggetto.', {
                                 chat_id: chatId,
-                                message_id: messageId
+                                message_id: messageId,
+                                reply_markup: optsBackToMain.reply_markup
                             });
                         }
                     })
@@ -295,7 +458,7 @@ bot.on('callback_query', (callbackQuery) => {
                         ]
                     })
                 };
-                bot.editMessageText(`Bentronato ${account.username}!\n Livello: ${account.level}\n Coins: ${account.coins}`, {
+                bot.editMessageText(`Bentronato ${account.username}!\n Livello: ${account.level}\n Exp: ${account.xp}/${account.xpTop}\n Coins: ${account.coins}`, {
                     chat_id: chatId,
                     message_id: messageId,
                     reply_markup: opts.reply_markup
@@ -715,10 +878,10 @@ function checkDailyBonus(telegramUserId) {
 
 function generateMonster(world) {
 
-    const rarities = Object.keys(rarityMultiplier);
+    const rarities = Object.keys(raritySpawnChance);
 
 
-    const totalWeight = rarities.reduce((sum, rarity) => sum + rarityMultiplier[rarity], 0);
+    const totalWeight = rarities.reduce((sum, rarity) => sum + raritySpawnChance[rarity], 0);
 
     while (true) {
 
@@ -729,7 +892,7 @@ function generateMonster(world) {
         let cumulativeWeight = 0;
 
         for (const rarity of rarities) {
-            cumulativeWeight += rarityMultiplier[rarity];
+            cumulativeWeight += raritySpawnChance[rarity];
             if (randomValue < cumulativeWeight) {
                 selectedRarity = rarity;
                 break;
@@ -757,32 +920,30 @@ function executeFightCycle(userId, worldId, monsterName, messageId, monsterLevel
             const world = worldDoc.data();
             const monster = world.mobs.find(mob => mob.name === monsterName);
 
-            // Inizializza statistiche del combattimento
-            let monsterHp = parseInt(monster.hp);
+            let monsterLevelNumber = parseInt(monsterLevel);
+            let monsterHp = parseInt(monster.hp) + (monsterLevelNumber * 10);
             let userHp = account.hp;
             let userLevel = account.level;
             const userAttack = calculateAttack(account);
             const userDefense = calculateDefense(account);
-            const monsterAttack = monster.attack;
-            const monsterDefense = monster.defense;
+            const monsterAttack = monster.attack + (monsterLevelNumber * 10);
+            const monsterDefense = monster.defense + (monsterLevelNumber * 10);
 
-            const chatIdActive = chatId || userId; // Usa `chatId` se definito, altrimenti `userId`
-
-            // Variabili per il riepilogo
+            const chatIdActive = chatId || userId; 
+            
             let turns = 0;
             let totalDamageDealt = 0;
             let totalDamageTaken = 0;
 
-            // Simula il combattimento
+        
             while (monsterHp > 0 && userHp > 0) {
-                // Calcola i danni del giocatore al mostro
-                const playerDamage = Math.max(0, (userAttack + userLevel * 0.5) - monsterDefense);
+                
+                const playerDamage = calculateDamage(userAttack, monsterDefense, userLevel);
                 monsterHp -= playerDamage;
                 totalDamageDealt += playerDamage;
 
-                // Se il mostro è ancora vivo, calcola i danni al giocatore
                 if (monsterHp > 0) {
-                    const monsterDamage = Math.max(0, (monsterAttack + parseInt(monsterLevel) * 0.3) - userDefense);
+                    const monsterDamage = calculateDamage(monsterAttack, userDefense, userLevel);
                     userHp -= monsterDamage;
                     totalDamageTaken += monsterDamage;
                 }
@@ -817,6 +978,10 @@ function executeFightCycle(userId, worldId, monsterName, messageId, monsterLevel
     });
 }
 
+function calculateDamage(attack, defense, levelBonus = 0) {
+    const effectiveAttack = attack + levelBonus;
+    return Math.max(1, Math.floor(effectiveAttack * (effectiveAttack / (effectiveAttack + defense))));
+}
 
 function calculateAttack(account) {
     return account.attack + account.weapon.attack;
@@ -900,7 +1065,7 @@ function calculateDrops(dropsArray) {
     const loot = [];
     dropsArray.forEach(drop => {
         const chance = Math.random() * 100;
-        if (chance < drop.rarity) {
+        if (chance < (101 - drop.rarity)) {
             loot.push(drop);
         }
     });
@@ -993,3 +1158,11 @@ function handleItemsCommand(chatId, messageId, userId, page = 1) {
 
 }
 
+async function createAdventure(adventureData) {
+    try {
+      const docRef = await addDoc(collection(database, "adventures"), adventureData);
+      console.log("Avventura creata con ID:", docRef.id);
+    } catch (e) {
+      console.error("Errore nell'inserire l'avventura nel database: ", e);
+    }
+  }
