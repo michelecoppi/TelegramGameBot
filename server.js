@@ -152,7 +152,8 @@ bot.on('callback_query', (callbackQuery) => {
                     reply_markup: optsBackToMain.reply_markup
                 });
             });
-    } else if (data === 'shop') {
+    } else if (data.startsWith('shop')) {
+        const page = parseInt(data.split('_')[1] || '0', 10);
         let shopItems = [];
         getDocs(collection(database, 'items'))
             .then(querySnapshot => {
@@ -160,14 +161,39 @@ bot.on('callback_query', (callbackQuery) => {
                     shopItems.push({ id: doc.id, ...doc.data() });
                 });
 
+                const totalPages = Math.ceil(shopItems.length / ITEMS_PER_PAGE);
+                const startIndex = page * ITEMS_PER_PAGE;
+                const endIndex = startIndex + ITEMS_PER_PAGE;
+
+                const itemsForPage = shopItems.slice(startIndex, endIndex);
+
                 let items = [];
-                for (let i = 0; i < shopItems.length; i++) {
-                    let item = shopItems[i];
+                for (let i = 0; i < itemsForPage.length; i++) {
+                    const item = itemsForPage[i];
                     items.push([{
                         text: `Acquista ${item.name} per ${item.price} coins`,
                         callback_data: `buy_${item.id}`
                     }]);
                 }
+
+                let navigationButtons = [];
+                if (page > 0) {
+                    navigationButtons.push({
+                        text: "⬅️ Indietro",
+                        callback_data: `shop_${page - 1}`
+                    });
+                }
+                if (page < totalPages - 1) {
+                    navigationButtons.push({
+                        text: "➡️ Avanti",
+                        callback_data: `shop_${page + 1}`
+                    });
+                }
+
+                if (navigationButtons.length > 0) {
+                    items.push(navigationButtons);
+                }
+
                 items.push([{
                     text: "Back",
                     callback_data: "back_to_main"
@@ -178,8 +204,6 @@ bot.on('callback_query', (callbackQuery) => {
                         inline_keyboard: items
                     })
                 };
-
-
 
                 bot.editMessageText('Negozio', {
                     chat_id: chatId,
@@ -193,7 +217,12 @@ bot.on('callback_query', (callbackQuery) => {
                 bot.editMessageText('Si è verificato un errore durante il recupero degli oggetti del negozio. Si prega di riprovare più tardi.', {
                     chat_id: chatId,
                     message_id: messageId,
-                    reply_markup: optsBackToMain.reply_markup
+                    reply_markup: JSON.stringify({
+                        inline_keyboard: [[{
+                            text: "Back",
+                            callback_data: "back_to_main"
+                        }]]
+                    })
                 });
             });
     } else if (data.startsWith('buy_')) {
@@ -207,7 +236,7 @@ bot.on('callback_query', (callbackQuery) => {
                             const newCoins = account.coins - shopItem.price;
                             updateDoc(doc(database, `users/${account.id}`), {
                                 coins: newCoins,
-                                items: [...account.items, { ...shopItem}]
+                                items: [...account.items, { ...shopItem }]
                             })
                                 .then(() => {
                                     invalidateCache(userId.toString());
@@ -593,7 +622,10 @@ bot.on('callback_query', (callbackQuery) => {
                         message_id: messageId,
                     }
                 ).then(sentMessage => {
-                    executeFightCycle(userId, worldId, monsterName, sentMessage.message_id, monsterLevel, sentMessage.chat.id);
+                    setTimeout(() => {
+                        executeFightCycle(userId, worldId, monsterName, sentMessage.message_id, monsterLevel, sentMessage.chat.id);
+                    }, 3000);
+                    
                 }).catch(error => {
                     console.error("Errore durante l'edit del messaggio:", error);
                 });
@@ -725,62 +757,66 @@ function executeFightCycle(userId, worldId, monsterName, messageId, monsterLevel
             const world = worldDoc.data();
             const monster = world.mobs.find(mob => mob.name === monsterName);
 
-            // Inizializza variabili del combattimento
+            // Inizializza statistiche del combattimento
             let monsterHp = parseInt(monster.hp);
+            let userHp = account.hp;
+            let userLevel = account.level;
+            const userAttack = calculateAttack(account);
+            const userDefense = calculateDefense(account);
             const monsterAttack = monster.attack;
             const monsterDefense = monster.defense;
 
-            let userHp = account.hp;
-            const userAttack = calculateAttack(account);
-            const userDefense = calculateDefense(account);
+            const chatIdActive = chatId || userId; // Usa `chatId` se definito, altrimenti `userId`
 
-            const chatIdActive = chatId === undefined ? userId : chatId;
+            // Variabili per il riepilogo
+            let turns = 0;
+            let totalDamageDealt = 0;
+            let totalDamageTaken = 0;
 
-
-            fightTurn();
-
-            function fightTurn() {
-                if (monsterHp <= 0) {
-                    handleVictory(userId, messageId, monster, account, monsterLevel, chatIdActive);
-                    return;
-                }
-
-                if (userHp <= 0) {
-                    handleDefeat(userId, messageId, monster, monsterLevel, chatIdActive);
-                    return;
-                }
-
-
-                const playerDamage = Math.max(0, userAttack - monsterDefense);
+            // Simula il combattimento
+            while (monsterHp > 0 && userHp > 0) {
+                // Calcola i danni del giocatore al mostro
+                const playerDamage = Math.max(0, (userAttack + userLevel * 0.5) - monsterDefense);
                 monsterHp -= playerDamage;
+                totalDamageDealt += playerDamage;
 
-
+                // Se il mostro è ancora vivo, calcola i danni al giocatore
                 if (monsterHp > 0) {
-                    const monsterDamage = Math.max(0, monsterAttack - userDefense);
+                    const monsterDamage = Math.max(0, (monsterAttack + parseInt(monsterLevel) * 0.3) - userDefense);
                     userHp -= monsterDamage;
+                    totalDamageTaken += monsterDamage;
                 }
 
-
-                bot.editMessageText(`⚔️ Combattimento contro *${monster.name}*!\n\n👤 *Tu*: ${userHp} HP\n🐉 *${monster.name} (Livello ${monsterLevel})*: ${monsterHp} HP\n\n👊 Hai inflitto ${playerDamage} danni.\n🔥 ${monster.name} ti ha inflitto ${monsterHp > 0 ? monsterAttack - userDefense : 0} danni.`, {
-                    chat_id: chatIdActive,
-                    message_id: messageId,
-                    parse_mode: "Markdown",
-                }).then(() => {
-
-                    setTimeout(fightTurn, 5000);
-                }).catch(error => {
-                    console.error("Errore durante l'editing del messaggio:", error);
-                });
+                turns++;
             }
+
+            const isVictory = monsterHp <= 0;
+            const battleSummary = `⚔️ *Combattimento contro ${monster.name}* (Livello ${monsterLevel})\n\n` +
+            `📊 *Riepilogo*\n` +
+            `- Turni: ${turns}\n` +
+            `- Danni inflitti: ${totalDamageDealt}\n` +
+            `- Danni subiti: ${totalDamageTaken}\n\n` +
+            `${isVictory ? "🎉 Hai vinto la battaglia!" : "💀 Sei stato sconfitto!"}`;
+
+            if (isVictory) {
+                handleVictory(userId, messageId, monster, account, monsterLevel, chatIdActive, battleSummary);
+            } else {
+                handleDefeat(userId, messageId, monster, monsterLevel, chatIdActive, battleSummary);
+            }
+
+            
+
+
         }).catch(error => {
             console.error('Errore nel recupero del mondo:', error);
-            bot.sendMessage(userId, 'Si è verificato un errore durante il caricamento del mondo. Riprova più tardi.');
+            bot.sendMessage(userId, '❌ Si è verificato un errore durante il caricamento del mondo. Riprova più tardi.');
         });
     }).catch(error => {
         console.error('Errore nel recupero dell\'account:', error);
-        bot.sendMessage(userId, 'Si è verificato un errore durante il caricamento del tuo account. Riprova più tardi.');
+        bot.sendMessage(userId, '❌ Si è verificato un errore durante il caricamento del tuo account. Riprova più tardi.');
     });
 }
+
 
 function calculateAttack(account) {
     return account.attack + account.weapon.attack;
@@ -790,11 +826,14 @@ function calculateDefense(account) {
     return account.defense + account.helmet.defense + account.chestplate.defense + account.leggings.defense + account.boots.defense;
 }
 
-function handleVictory(userId, messageId, monster, account, monsterLevel, chatIdActive) {
+function handleVictory(userId, messageId, monster, account, monsterLevel, chatIdActive, battleSummary) {
     const xpGain = calculateXpGain(account.level, monster, monsterLevel);
     const drops = calculateDrops(monster.drops);
 
-    bot.editMessageText(`🎉 Hai sconfitto *${monster.name} (Level ${monsterLevel})*!\n\n🏆 XP guadagnata: ${xpGain}\n🎁 Oggetti ottenuti: ${drops.map(d => d.name).join(', ') || "Nessuno"}`, {
+    bot.editMessageText( `${battleSummary}\n\n` +
+        `🎉 Hai sconfitto *${monster.name}*!\n` +
+        `🏆 XP guadagnata: ${xpGain}\n` +
+        `🎁 Oggetti ottenuti: ${drops.map(d => d.name).join(', ') || "Nessuno"}`, {
         chat_id: chatIdActive,
         message_id: messageId,
         parse_mode: "Markdown",
@@ -868,13 +907,18 @@ function calculateDrops(dropsArray) {
     return loot;
 }
 
-function handleDefeat(userId, messageId, monster, monsterLevel, chatIdActive) {
-    bot.editMessageText(`💀 Sei stato sconfitto da *${monster.name} (Livello ${monsterLevel})*!\nProva a potenziarti e riprova la prossima volta.`, {
-        chat_id: chatIdActive,
-        message_id: messageId,
-        parse_mode: "Markdown",
-        reply_markup: optsBackToMain.reply_markup
-    });
+function handleDefeat(userId, messageId, monster, monsterLevel, chatIdActive, battleSummary) {
+    bot.editMessageText(
+        `${battleSummary}\n\n` +
+        `💀 Sei stato sconfitto da *${monster.name} (Livello ${monsterLevel})*!\n` +
+        `Prova a potenziarti e riprova la prossima volta.`,
+        {
+            chat_id: chatIdActive,
+            message_id: messageId,
+            parse_mode: "Markdown",
+            reply_markup: optsBackToMain.reply_markup
+        }
+    );
 }
 
 
