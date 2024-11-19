@@ -6,6 +6,7 @@ const bot = new TelegramBot(token, { polling: true });
 
 const express = require('express');
 const e = require('express');
+const { parse } = require('dotenv');
 const telegramBot = express();
 
 
@@ -55,105 +56,105 @@ const adventureData = {
     img: "",
     description: "",
     mobs: [
-      {
-        name: "Orco gelato",
-        attack: 50,
-        defense: 100,
-        hp: 100,
-        rarity: "Common",
-        baseXp: 40,
-        img: "",
-        drops: [
-          {
-            name: "Mazza ghiacciata",
-            effect: "WEAPON",
-            attack: 52,
-            price: 30,
-            rarity: 90
-          },
-          {
-            name: "Palla di Neve",
-            effect: "",
-            price: 5,
-            rarity: 5
-          },
-            {
-                name: "Gelato al cioccolato",
-                effect: "",
-                price: 10,
-                rarity: 20
-            },
-            {
-                name: "Pelle di orco",
-                effect: "",
-                price: 40,
-                rarity: 60
-            }
+        {
+            name: "Orco gelato",
+            attack: 50,
+            defense: 100,
+            hp: 100,
+            rarity: "Common",
+            baseXp: 40,
+            img: "",
+            drops: [
+                {
+                    name: "Mazza ghiacciata",
+                    effect: "WEAPON",
+                    attack: 52,
+                    price: 30,
+                    rarity: 90
+                },
+                {
+                    name: "Palla di Neve",
+                    effect: "",
+                    price: 5,
+                    rarity: 5
+                },
+                {
+                    name: "Gelato al cioccolato",
+                    effect: "",
+                    price: 10,
+                    rarity: 20
+                },
+                {
+                    name: "Pelle di orco",
+                    effect: "",
+                    price: 40,
+                    rarity: 60
+                }
 
-        ]
-      },
-      {
-        name: "Lupo delle nevi",
-        attack: 70,
-        defense: 120,
-        hp: 200,
-        rarity: "Uncommon",
-        baseXp: 60,
-        img: "",
-        drops: [
-          {
-            name: "Zanna di lupo",
-            effect: "WEAPON",
-            price: 50,
-            rarity: 90,
-            attack: 80
-          },
-          {
-            name: "Pietra di ghiaccio",
-            effect: "",
-            price: 20,
-            rarity: 40
-          },
-          {
-            name: "Pelle di lupo",
-            effect: "",
-            price: 60,
-            rarity: 70
-          }
-        ]
-      },
-      {
-        name: "Yeti",
-        attack: 120,
-        defense: 100,
-        hp: 300,
-        rarity: "Rare",
-        baseXp: 80,
-        img: "",
-        drops: [
-          {
-            name: "Artiglio del yeti",
-            effect: "WEAPON",
-            price: 150,
-            rarity: 95,
-            attack: 110
-          },
-          {
-            name: "Pelo dello yeti",
-            effect: "",
-            price: 200,
-            rarity: 80
-          },
-          {
-             name: "Muco",
-             effect: "",
-             price: 10,
-             rarity: 30
-          }
+            ]
+        },
+        {
+            name: "Lupo delle nevi",
+            attack: 70,
+            defense: 120,
+            hp: 200,
+            rarity: "Uncommon",
+            baseXp: 60,
+            img: "",
+            drops: [
+                {
+                    name: "Zanna di lupo",
+                    effect: "WEAPON",
+                    price: 50,
+                    rarity: 90,
+                    attack: 80
+                },
+                {
+                    name: "Pietra di ghiaccio",
+                    effect: "",
+                    price: 20,
+                    rarity: 40
+                },
+                {
+                    name: "Pelle di lupo",
+                    effect: "",
+                    price: 60,
+                    rarity: 70
+                }
+            ]
+        },
+        {
+            name: "Yeti",
+            attack: 120,
+            defense: 100,
+            hp: 300,
+            rarity: "Rare",
+            baseXp: 80,
+            img: "",
+            drops: [
+                {
+                    name: "Artiglio del yeti",
+                    effect: "WEAPON",
+                    price: 150,
+                    rarity: 95,
+                    attack: 110
+                },
+                {
+                    name: "Pelo dello yeti",
+                    effect: "",
+                    price: 200,
+                    rarity: 80
+                },
+                {
+                    name: "Muco",
+                    effect: "",
+                    price: 10,
+                    rarity: 30
+                }
 
 
-        ]
-      },
+            ]
+        },
         {
             name: "Regina del Ghiaccio",
             attack: 300,
@@ -163,45 +164,92 @@ const adventureData = {
             baseXp: 200,
             img: "",
             drops: [
-            {
-                name: "Scettro glaciale",
-                effect: "WEAPON",
-                price: 300,
-                rarity: 100,
-                attack: 200
-            },
-            {
-                name: "Corona di ghiaccio",
-                effect: "HELMET",
-                price: 200,
-                rarity: 100,
-                defense: 200
-            },
-            {
-                name: "Corazza di ghiaccio",
-                effect: "CHESTPLATE",
-                price: 200,
-                rarity: 100,
-                defense: 200
-            },
-            {
-                name: "Pantaloni di ghiaccio",
-                effect: "LEGGINGS",
-                price: 200,
-                rarity: 100,
-                defense: 200
-            },
-            {
-                name: "Stivali di ghiaccio",
-                effect: "BOOTS",
-                price: 200,
-                rarity: 100,
-                defense: 200
-            }
+                {
+                    name: "Scettro glaciale",
+                    effect: "WEAPON",
+                    price: 300,
+                    rarity: 100,
+                    attack: 200
+                },
+                {
+                    name: "Corona di ghiaccio",
+                    effect: "HELMET",
+                    price: 200,
+                    rarity: 100,
+                    defense: 200
+                },
+                {
+                    name: "Corazza di ghiaccio",
+                    effect: "CHESTPLATE",
+                    price: 200,
+                    rarity: 100,
+                    defense: 200
+                },
+                {
+                    name: "Pantaloni di ghiaccio",
+                    effect: "LEGGINGS",
+                    price: 200,
+                    rarity: 100,
+                    defense: 200
+                },
+                {
+                    name: "Stivali di ghiaccio",
+                    effect: "BOOTS",
+                    price: 200,
+                    rarity: 100,
+                    defense: 200
+                }
             ]
         }
     ]
-  };
+};
+
+
+const userQueues = new Map();
+
+function enqueueRequest(userId, request) {
+    if (!userQueues.has(userId)) {
+        userQueues.set(userId, []);
+    }
+    const queue = userQueues.get(userId);
+    queue.push(request);
+    processQueue(userId);
+}
+
+function processQueue(userId) {
+    const queue = userQueues.get(userId);
+    if (!queue || queue.length === 0) {
+        return;
+    }
+
+    const { isProcessingQueue } = queue;
+    if (isProcessingQueue) {
+        return;
+    }
+
+    queue.isProcessingQueue = true;
+    const { chatId, messageId, text, options } = queue.shift();
+
+    setTimeout(() => {
+        bot.editMessageText(text, {
+            chat_id: chatId,
+            message_id: messageId,
+            ...options
+        }).then(() => {
+            queue.retryAfter = 1000; 
+        }).catch(error => {
+            if (error.response && error.response.statusCode === 429) {
+                const retryAfterSeconds = error.response.body.parameters.retry_after;
+                console.warn(`Too Many Requests: retrying after ${retryAfterSeconds} seconds`);
+                queue.retryAfter = (retryAfterSeconds + 1) * 1000; 
+                console.error('Errore durante l\'aggiornamento del messaggio:', error);
+            }
+        }).finally(() => {
+            queue.isProcessingQueue = false;
+            setTimeout(() => processQueue(userId), queue.retryAfter); 
+        });
+    }, 1000); 
+}
 
 bot.onText(/\/update/, (msg) => {
     //createAdventure(adventureData)
@@ -275,43 +323,58 @@ bot.on('callback_query', (callbackQuery) => {
                             })
                                 .then(() => {
                                     invalidateCache(userId.toString());
-                                    bot.editMessageText('Bonus giornaliero di 100 coins ritirato con successo!', {
-                                        chat_id: chatId,
-                                        message_id: messageId,
-                                        reply_markup: optsBackToMain.reply_markup
+                                    enqueueRequest(userId,{
+                                        chatId,
+                                        messageId,
+                                        text: 'Bonus giornaliero di 100 coins ritirato con successo!',
+                                        options: {
+                                            reply_markup: optsBackToMain.reply_markup
+                                        }
                                     });
                                 })
                                 .catch(error => {
                                     console.log('Errore durante il ritiro del bonus giornaliero:', error);
-                                    bot.editMessageText('Si è verificato un errore durante il ritiro del bonus giornaliero. Si prega di riprovare più tardi.', {
-                                        chat_id: chatId,
-                                        message_id: messageId,
-                                        reply_markup: optsBackToMain.reply_markup
+                                    enqueueRequest(userId,{
+                                        chatId,
+                                        messageId,
+                                        text: 'Si è verificato un errore durante il ritiro del bonus giornaliero. Si prega di riprovare più tardi.',
+                                        options: {
+                                            reply_markup: optsBackToMain.reply_markup
+                                        }
                                     });
                                 });
                         })
                         .catch(error => {
                             console.log('Errore durante il recupero dell\'account:', error);
-                            bot.editMessageText('Si è verificato un errore durante il recupero dell\'account. Si prega di riprovare più tardi.', {
-                                chat_id: chatId,
-                                message_id: messageId,
-                                reply_markup: optsBackToMain.reply_markup
+                            enqueueRequest(userId,{
+                                chatId,
+                                messageId,
+                                text: 'Si è verificato un errore durante il recupero dell\'account. Si prega di riprovare più tardi.',
+                                options: {
+                                    reply_markup: optsBackToMain.reply_markup
+                                }
                             });
                         });
                 } else {
-                    bot.editMessageText('Hai già ritirato il bonus giornaliero.', {
-                        chat_id: chatId,
-                        message_id: messageId,
-                        reply_markup: optsBackToMain.reply_markup
+                    enqueueRequest(userId,{
+                        chatId,
+                        messageId,
+                        text: 'Hai già ritirato il bonus giornaliero per oggi!',
+                        options: {
+                            reply_markup: optsBackToMain.reply_markup
+                        }
                     });
                 }
             })
             .catch(error => {
                 console.log('Errore durante il controllo del bonus giornaliero:', error);
-                bot.editMessageText('Si è verificato un errore durante il controllo del bonus giornaliero. Si prega di riprovare più tardi.', {
-                    chat_id: chatId,
-                    message_id: messageId,
-                    reply_markup: optsBackToMain.reply_markup
+                enqueueRequest(userId,{
+                    chatId,
+                    messageId,
+                    text: 'Si è verificato un errore durante il ritiro del bonus giornaliero. Si prega di riprovare più tardi.',
+                    options: {
+                        reply_markup: optsBackToMain.reply_markup
+                    }
                 });
             });
     } else if (data.startsWith('shop')) {
@@ -367,24 +430,25 @@ bot.on('callback_query', (callbackQuery) => {
                     })
                 };
 
-                bot.editMessageText('Negozio', {
-                    chat_id: chatId,
-                    message_id: messageId,
-                    reply_markup: opts.reply_markup
+                enqueueRequest(userId,{
+                    chatId,
+                    messageId,
+                    text: 'Negozio',
+                    options: {
+                        reply_markup: opts.reply_markup
+                    }
                 });
 
             })
             .catch(error => {
                 console.log('Errore durante il recupero degli oggetti del negozio:', error);
-                bot.editMessageText('Si è verificato un errore durante il recupero degli oggetti del negozio. Si prega di riprovare più tardi.', {
-                    chat_id: chatId,
-                    message_id: messageId,
-                    reply_markup: JSON.stringify({
-                        inline_keyboard: [[{
-                            text: "Back",
-                            callback_data: "back_to_main"
-                        }]]
-                    })
+                enqueueRequest(userId,{
+                    chatId,
+                    messageId,
+                    text: 'Si è verificato un errore durante il recupero degli oggetti del negozio. Si prega di riprovare più tardi.',
+                    options: {
+                        reply_markup: optsBackToMain.reply_markup
+                    }
                 });
             });
     } else if (data.startsWith('buy_')) {
@@ -402,41 +466,58 @@ bot.on('callback_query', (callbackQuery) => {
                             })
                                 .then(() => {
                                     invalidateCache(userId.toString());
-                                    bot.editMessageText(`Hai acquistato ${shopItem.name} per ${shopItem.price} coins!`, {
-                                        chat_id: chatId,
-                                        message_id: messageId,
-                                        reply_markup: optsBackToMain.reply_markup
+                                    enqueueRequest(userId,{
+                                        chatId,
+                                        messageId,
+                                        text: `Hai acquistato ${shopItem.name} per ${shopItem.price} coins!`,
+                                        options: {
+                                            reply_markup: optsBackToMain.reply_markup
+                                        }
                                     });
                                 })
                                 .catch(error => {
                                     console.log('Errore durante l\'acquisto dell\'oggetto:', error);
-                                    bot.editMessageText('Si è verificato un errore durante l\'acquisto dell\'oggetto. Si prega di riprovare più tardi.', {
-                                        chat_id: chatId,
-                                        message_id: messageId,
-                                        reply_markup: optsBackToMain.reply_markup
+                                    enqueueRequest(userId,{
+                                        chatId,
+                                        messageId,
+                                        text: `Si è verificato un errore durante l\'acquisto dell\'oggetto. Si prega di riprovare più tardi.`,
+                                        options: {
+                                            reply_markup: optsBackToMain.reply_markup
+                                        }
                                     });
                                 });
                         } else {
-                            bot.editMessageText('Non hai abbastanza coins per acquistare questo oggetto.', {
-                                chat_id: chatId,
-                                message_id: messageId,
-                                reply_markup: optsBackToMain.reply_markup
+                            enqueueRequest(userId,{
+                                chatId,
+                                messageId,
+                                text: 'Non hai abbastanza coins per acquistare questo oggetto.',
+                                options: {
+                                    reply_markup: optsBackToMain.reply_markup
+                                }
                             });
                         }
                     })
                     .catch(error => {
                         console.log('Errore durante il recupero dell\'oggetto del negozio:', error);
-                        bot.editMessageText('Si è verificato un errore durante il recupero dell\'oggetto del negozio. Si prega di riprovare più tardi.', {
-                            chat_id: chatId,
-                            message_id: messageId
+                        enqueueRequest(userId,{
+                            chatId,
+                            messageId,
+                            text: 'Si è verificato un errore durante il recupero dell\'oggetto del negozio. Si prega di riprovare più tardi.',
+                            options: {
+                                reply_markup: optsBackToMain.reply_markup
+                            }
                         });
                     });
             })
             .catch(error => {
                 console.log('Errore durante il recupero dell\'account:', error);
-                bot.editMessageText('Si è verificato un errore durante il recupero dell\'account. Si prega di riprovare più tardi.', {
-                    chat_id: chatId,
-                    message_id: messageId
+                enqueueRequest(userId,{
+                    chatId,
+                    messageId,
+                    text: 'Si è verificato un errore durante il recupero dell\'account. Si prega di riprovare più tardi.',
+                    options: {
+                        reply_markup: optsBackToMain.reply_markup
+                    }
                 });
             });
     } else if (data.startsWith('items_page_')) {
@@ -458,17 +539,24 @@ bot.on('callback_query', (callbackQuery) => {
                         ]
                     })
                 };
-                bot.editMessageText(`Bentronato ${account.username}!\n Livello: ${account.level}\n Exp: ${account.xp}/${account.xpTop}\n Coins: ${account.coins}`, {
-                    chat_id: chatId,
-                    message_id: messageId,
-                    reply_markup: opts.reply_markup
+                enqueueRequest(userId,{
+                    chatId,
+                    messageId,
+                    text: `Bentronato ${account.username}!\n Livello: ${account.level}\n Exp: ${account.xp}/${account.xpTop}\n Coins: ${account.coins}`,
+                    options: {
+                        reply_markup: opts.reply_markup
+                    }
                 });
             })
             .catch(error => {
                 console.log('Errore durante il recupero dell\'account:', error);
-                bot.editMessageText('Si è verificato un errore durante il recupero dell\'account. Si prega di riprovare più tardi.', {
-                    chat_id: chatId,
-                    message_id: messageId
+                enqueueRequest(userId,{
+                    chatId,
+                    messageId,
+                    text: 'Si è verificato un errore durante il recupero dell\'account. Si prega di riprovare più tardi.',
+                    options: {
+                        reply_markup: optsBackToMain.reply_markup
+                    }
                 });
             });
     } else if (data === 'inventory') {
@@ -486,17 +574,24 @@ bot.on('callback_query', (callbackQuery) => {
                         ]
                     })
                 };
-                bot.editMessageText(`Inventario di ${account.username}:\n\nElmo: ${account.helmet.name}\nCorazza: ${account.chestplate.name}\nPantaloni: ${account.leggings.name}\nStivali: ${account.boots.name}\nArma: ${account.weapon.name}`, {
-                    chat_id: chatId,
-                    message_id: messageId,
-                    reply_markup: opts.reply_markup
+                enqueueRequest(userId,{
+                    chatId,
+                    messageId,
+                    text: `Inventario di ${account.username}:\n\nElmo: ${account.helmet.name}\nCorazza: ${account.chestplate.name}\nPantaloni: ${account.leggings.name}\nStivali: ${account.boots.name}\nArma: ${account.weapon.name}`,
+                    options: {
+                        reply_markup: opts.reply_markup
+                    }
                 });
             })
             .catch(error => {
                 console.log('Errore durante il recupero dell\'account:', error);
-                bot.editMessageText('Si è verificato un errore durante il recupero dell\'account. Si prega di riprovare più tardi.', {
-                    chat_id: chatId,
-                    message_id: messageId
+                enqueueRequest(userId,{
+                    chatId,
+                    messageId,
+                    text: 'Si è verificato un errore durante il recupero dell\'account. Si prega di riprovare più tardi.',
+                    options: {
+                        reply_markup: optsBackToMain.reply_markup
+                    }
                 });
             });
     } else if (data.startsWith("equip_")) {
@@ -518,34 +613,42 @@ bot.on('callback_query', (callbackQuery) => {
 
                 const equipArray = equipDefault ? [account[equipment], ...equips] : equips;
 
-
-                bot.editMessageText(`Seleziona l'oggetto da equipaggiare come ${equipment}:`, {
-                    chat_id: chatId,
-                    message_id: messageId,
-                    reply_markup: JSON.stringify({
-                        inline_keyboard: equipArray.map(i => [{
-                            text: i.equip === true ? `✅ ${i.name}` : i.name,
-                            callback_data: i.equip === true ? `already_equipped_${i.name}` : `equipaction_${equipment}_${i.name}`
-                        }]).concat([[{ text: 'Torna all\'inventario', callback_data: 'inventory' }]])
-                    })
+                enqueueRequest(userId,{
+                    chatId,
+                    messageId,
+                    text: `Seleziona l'oggetto da equipaggiare come ${equipment}:`,
+                    options: {
+                        reply_markup: JSON.stringify({
+                            inline_keyboard: equipArray.map(i => [{
+                                text: i.equip === true ? `✅ ${i.name}` : i.name,
+                                callback_data: i.equip === true ? `already_equipped_${i.name}` : `equipaction_${equipment}_${i.name}`
+                            }]).concat([[{ text: 'Torna all\'inventario', callback_data: 'inventory' }]])
+                        })
+                    }
                 });
             }
             )
             .catch(error => {
                 console.log('Errore durante il recupero dell\'account:', error);
-                bot.editMessageText('Si è verificato un errore durante il recupero dell\'account. Si prega di riprovare più tardi.', {
-                    chat_id: chatId,
-                    message_id: messageId
+                enqueueRequest(userId,{
+                    chatId,
+                    messageId,
+                    text: 'Si è verificato un errore durante il recupero dell\'account. Si prega di riprovare più tardi.',
+                    options: {
+                        reply_markup: optsBackToMain.reply_markup
+                    }
                 });
-
-
 
             })
             .catch(error => {
                 console.log('Errore durante il recupero dell\'account:', error);
-                bot.editMessageText('Si è verificato un errore durante il recupero dell\'account. Si prega di riprovare più tardi.', {
-                    chat_id: chatId,
-                    message_id: messageId
+                enqueueRequest(userId,{
+                    chatId,
+                    messageId,
+                    text: 'Si è verificato un errore durante il recupero dell\'account. Si prega di riprovare più tardi.',
+                    options: {
+                        reply_markup: optsBackToMain.reply_markup
+                    }
                 });
             });
     } else if (data.startsWith("equipaction_")) {
@@ -577,26 +680,36 @@ bot.on('callback_query', (callbackQuery) => {
                 })
                     .then(() => {
                         invalidateCache(userId.toString());
-                        bot.editMessageText(`Hai equipaggiato ${itemName} come ${equipment}!`, {
-                            chat_id: chatId,
-                            message_id: messageId,
-                            reply_markup: optsBackToMain.reply_markup
+                        enqueueRequest(userId,{
+                            chatId,
+                            messageId,
+                            text: `Hai equipaggiato ${itemName} come ${equipment}!`,
+                            options: {
+                                reply_markup: optsBackToMain.reply_markup
+                            }
                         });
                     })
                     .catch(error => {
                         console.log('Errore durante l\'equipaggiamento dell\'oggetto:', error);
-                        bot.editMessageText('Si è verificato un errore durante l\'equipaggiamento dell\'oggetto. Si prega di riprovare più tardi.', {
-                            chat_id: chatId,
-                            message_id: messageId,
-                            reply_markup: optsBackToMain.reply_markup
+                        enqueueRequest(userId,{
+                            chatId,
+                            messageId,
+                            text: 'Si è verificato un errore durante l\'equipaggiamento dell\'oggetto. Si prega di riprovare più tardi.',
+                            options: {
+                                reply_markup: optsBackToMain.reply_markup
+                            }
                         });
                     });
             })
             .catch(error => {
                 console.log('Errore durante il recupero dell\'account:', error);
-                bot.editMessageText('Si è verificato un errore durante il recupero dell\'account. Si prega di riprovare più tardi.', {
-                    chat_id: chatId,
-                    message_id: messageId
+                enqueueRequest(userId,{
+                    chatId,
+                    messageId,
+                    text: 'Si è verificato un errore durante il recupero dell\'account. Si prega di riprovare più tardi.',
+                    options: {
+                        reply_markup: optsBackToMain.reply_markup
+                    }
                 });
             });
     } else if (data.startsWith("already_equipped_")) {
@@ -626,26 +739,36 @@ bot.on('callback_query', (callbackQuery) => {
 
                 inlineKeyboard.push([{ text: 'Torna al menu principale', callback_data: 'back_to_main' }]);
 
-
-                bot.editMessageText('Benvenuto nelle avventure! Scegli il luogo dove vuoi andare:', {
-                    chat_id: chatId,
-                    message_id: messageId,
-                    reply_markup: JSON.stringify({
-                        inline_keyboard: inlineKeyboard
-                    })
+                enqueueRequest(userId,{
+                    chatId,
+                    messageId,
+                    text: 'Benvenuto nelle avventure! Scegli il luogo dove vuoi andare:',
+                    options: {
+                        reply_markup: JSON.stringify({
+                            inline_keyboard: inlineKeyboard
+                        })
+                    }
                 });
             }).catch(error => {
                 console.error('Errore nel recupero dei mondi:', error);
-                bot.editMessageText('Si è verificato un errore durante il caricamento delle avventure. Riprova più tardi.', {
-                    chat_id: chatId,
-                    message_id: messageId
+                enqueueRequest(userId,{
+                    chatId,
+                    messageId,
+                    text: 'Si è verificato un errore durante il caricamento delle avventure. Riprova più tardi.',
+                    options: {
+                        reply_markup: optsBackToMain.reply_markup
+                    }
                 });
             });
         }).catch(error => {
             console.error('Errore nel recupero dell\'account:', error);
-            bot.editMessageText('Si è verificato un errore durante il caricamento del tuo account. Riprova più tardi.', {
-                chat_id: chatId,
-                message_id: messageId
+            enqueueRequest(userId,{
+                chatId,
+                messageId,
+                text: 'Si è verificato un errore durante il caricamento del tuo account. Riprova più tardi.',
+                options: {
+                    reply_markup: optsBackToMain.reply_markup
+                }
             });
         });
     }
@@ -662,32 +785,43 @@ bot.on('callback_query', (callbackQuery) => {
                 world = world.data();
                 const monster = generateMonster(world);
                 const monsterLevel = generateMonsterLevel(account.level);
-                bot.editMessageText(`Sei entrato nel mondo di ${world.place}! Ti sei imbattuto in un ${monster.name} di livello ${monsterLevel}!`, {
-                    chat_id: chatId,
-                    message_id: messageId,
-                    reply_markup: JSON.stringify({
-                        inline_keyboard: [[{
-                            text: 'Combatti!',
-                            callback_data: `fight_${worldId}_${monster.name}_${monsterLevel}`
-                        }, {
-                            text: 'Fuggi!',
-                            callback_data: `flee_${worldId}_${monster.name}_${monsterLevel}`
-                        }]]
-                    })
+                enqueueRequest(userId,{
+                    chatId,
+                    messageId,
+                    text: `Sei entrato nel mondo di ${world.place}! Ti sei imbattuto in un ${monster.name} di livello ${monsterLevel}!`,
+                    options: {
+                        reply_markup: JSON.stringify({
+                            inline_keyboard: [[{
+                                text: 'Combatti!',
+                                callback_data: `fight_${worldId}_${monster.name}_${monsterLevel}`
+                            }, {
+                                text: 'Fuggi!',
+                                callback_data: `flee_${worldId}_${monster.name}_${monsterLevel}`
+                            }]]
+                        })
+                    }
                 });
 
             }).catch(error => {
                 console.error('Errore nel recupero del mondo:', error);
-                bot.editMessageText('Si è verificato un errore durante il caricamento del mondo. Riprova più tardi.', {
-                    chat_id: chatId,
-                    message_id: messageId
+                enqueueRequest(userId,{
+                    chatId,
+                    messageId,
+                    text: 'Si è verificato un errore durante il caricamento del mondo. Riprova più tardi.',
+                    options: {
+                        reply_markup: optsBackToMain.reply_markup
+                    }
                 });
             });
         }).catch(error => {
             console.error('Errore nel recupero dell\'account:', error);
-            bot.editMessageText('Si è verificato un errore durante il caricamento del tuo account. Riprova più tardi.', {
-                chat_id: chatId,
-                message_id: messageId
+            enqueueRequest(userId,{
+                chatId,
+                messageId,
+                text: 'Si è verificato un errore durante il caricamento del tuo account. Riprova più tardi.',
+                options: {
+                    reply_markup: optsBackToMain.reply_markup
+                }
             });
         });
     } else if (data.startsWith('flee_')) {
@@ -700,17 +834,20 @@ bot.on('callback_query', (callbackQuery) => {
 
 
             if (coins === 0) {
-                bot.editMessageText(`Sei fuggito dal mostro ${monsterName} (Livello ${monsterLevel}). Senza gloria e senza monete!`, {
-                    chat_id: chatId,
-                    message_id: messageId,
-                    reply_markup: JSON.stringify({
-                        inline_keyboard: [
-                            [{
-                                text: 'Torna alle avventure',
-                                callback_data: 'adventure'
-                            }]
-                        ]
-                    })
+                enqueueRequest(userId,{
+                    chatId,
+                    messageId,
+                    text: `Sei fuggito dal mostro ${monsterName} (Livello ${monsterLevel}). Senza gloria e senza monete!`,
+                    options: {
+                        reply_markup: JSON.stringify({
+                            inline_keyboard: [
+                                [{
+                                    text: 'Torna alle avventure',
+                                    callback_data: 'adventure'
+                                }]
+                            ]
+                        })
+                    }
                 });
                 return;
             }
@@ -730,37 +867,53 @@ bot.on('callback_query', (callbackQuery) => {
 
                     invalidateCache(userId.toString());
                     let lossMessage = coins < 5 ? `Hai perso tutte le tue monete!` : `Hai perso 5 monete!`;
-                    bot.editMessageText(`Sei fuggito dal mostro ${monsterName} (Livello ${monsterLevel}). ${lossMessage}`, {
-                        chat_id: chatId,
-                        message_id: messageId,
-                        reply_markup: JSON.stringify({
-                            inline_keyboard: [
-                                [{
-                                    text: 'Torna alle avventure',
-                                    callback_data: 'adventure'
-                                }]
-                            ]
-                        })
+                    enqueueRequest(userId,{
+                        chatId,
+                        messageId,
+                        text: `Sei fuggito dal mostro ${monsterName} (Livello ${monsterLevel}). ${lossMessage}`,
+                        options: {
+                            reply_markup: JSON.stringify({
+                                inline_keyboard: [
+                                    [{
+                                        text: 'Torna alle avventure',
+                                        callback_data: 'adventure'
+                                    }]
+                                ]
+                            })
+                        }
                     });
+
                 }).catch(error => {
                     console.error('Errore nel recupero del mondo:', error);
-                    bot.editMessageText('Si è verificato un errore durante il caricamento del mondo. Riprova più tardi.', {
-                        chat_id: chatId,
-                        message_id: messageId
+                    enqueueRequest(userId,{
+                        chatId,
+                        messageId,
+                        text: 'Si è verificato un errore durante il caricamento del mondo. Riprova più tardi.',
+                        options: {
+                            reply_markup: optsBackToMain.reply_markup
+                        }
                     });
                 });
             }).catch(error => {
                 console.error('Errore nell\'aggiornamento del saldo monete:', error);
-                bot.editMessageText('Si è verificato un errore durante l\'aggiornamento delle tue monete. Riprova più tardi.', {
-                    chat_id: chatId,
-                    message_id: messageId
+                enqueueRequest(userId,{
+                    chatId,
+                    messageId,
+                    text: 'Si è verificato un errore durante l\'aggiornamento delle tue monete. Riprova più tardi.',
+                    options: {
+                        reply_markup: optsBackToMain.reply_markup
+                    }
                 });
             });
         }).catch(error => {
             console.error('Errore nel recupero dell\'account:', error);
-            bot.editMessageText('Si è verificato un errore durante il caricamento del tuo account. Riprova più tardi.', {
-                chat_id: chatId,
-                message_id: messageId
+            enqueueRequest(userId,{
+                chatId,
+                messageId,
+                text: 'Si è verificato un errore durante il caricamento del tuo account. Riprova più tardi.',
+                options: {
+                    reply_markup: optsBackToMain.reply_markup
+                }
             });
         });
     } else if (data.startsWith('fight_')) {
@@ -777,21 +930,18 @@ bot.on('callback_query', (callbackQuery) => {
                 const monsterHp = monster.hp;
 
 
-                bot.editMessageText(
-                    `Inizia il combattimento contro ${monster.name}!\n\n👤 *Tu*: ${userHp} HP\n🐉 *${monster.name}*: ${monsterHp} HP Livello ${monsterLevel}`,
-                    {
-                        parse_mode: "Markdown",
-                        chat_id: chatId,
-                        message_id: messageId,
+                enqueueRequest(userId,{
+                    chatId,
+                    messageId,
+                    text: `Inizia il combattimento contro ${monster.name}!\n\n👤 *Tu*: ${userHp} HP\n🐉 *${monster.name}*: ${monsterHp} HP Livello ${monsterLevel}`,
+                    options: {
+                        parse_mode: "Markdown"
                     }
-                ).then(sentMessage => {
-                    setTimeout(() => {
-                        executeFightCycle(userId, worldId, monsterName, sentMessage.message_id, monsterLevel, sentMessage.chat.id);
-                    }, 3000);
-                    
-                }).catch(error => {
-                    console.error("Errore durante l'edit del messaggio:", error);
                 });
+                setTimeout(() => {
+                    executeFightCycle(userId, worldId, monsterName, messageId, monsterLevel, chatId);
+                }, 2000);
+
 
             }).catch(error => {
                 console.error("Errore durante il recupero del mondo:", error);
@@ -929,15 +1079,15 @@ function executeFightCycle(userId, worldId, monsterName, messageId, monsterLevel
             const monsterAttack = monster.attack + (monsterLevelNumber * 10);
             const monsterDefense = monster.defense + (monsterLevelNumber * 10);
 
-            const chatIdActive = chatId || userId; 
-            
+            const chatIdActive = chatId || userId;
+
             let turns = 0;
             let totalDamageDealt = 0;
             let totalDamageTaken = 0;
 
-        
+
             while (monsterHp > 0 && userHp > 0) {
-                
+
                 const playerDamage = calculateDamage(userAttack, monsterDefense, userLevel);
                 monsterHp -= playerDamage;
                 totalDamageDealt += playerDamage;
@@ -953,11 +1103,11 @@ function executeFightCycle(userId, worldId, monsterName, messageId, monsterLevel
 
             const isVictory = monsterHp <= 0;
             const battleSummary = `⚔️ *Combattimento contro ${monster.name}* (Livello ${monsterLevel})\n\n` +
-            `📊 *Riepilogo*\n` +
-            `- Turni: ${turns}\n` +
-            `- Danni inflitti: ${totalDamageDealt}\n` +
-            `- Danni subiti: ${totalDamageTaken}\n\n` +
-            `${isVictory ? "🎉 Hai vinto la battaglia!" : "💀 Sei stato sconfitto!"}`;
+                `📊 *Riepilogo*\n` +
+                `- Turni: ${turns}\n` +
+                `- Danni inflitti: ${totalDamageDealt}\n` +
+                `- Danni subiti: ${totalDamageTaken}\n\n` +
+                `${isVictory ? "🎉 Hai vinto la battaglia!" : "💀 Sei stato sconfitto!"}`;
 
             if (isVictory) {
                 handleVictory(userId, messageId, monster, account, monsterLevel, chatIdActive, battleSummary);
@@ -965,7 +1115,7 @@ function executeFightCycle(userId, worldId, monsterName, messageId, monsterLevel
                 handleDefeat(userId, messageId, monster, monsterLevel, chatIdActive, battleSummary);
             }
 
-            
+
 
 
         }).catch(error => {
@@ -995,15 +1145,18 @@ function handleVictory(userId, messageId, monster, account, monsterLevel, chatId
     const xpGain = calculateXpGain(account.level, monster, monsterLevel);
     const drops = calculateDrops(monster.drops);
 
-    bot.editMessageText( `${battleSummary}\n\n` +
+    enqueueRequest(userId,{
+        chatId: chatIdActive,
+        messageId: messageId,
+        text: `${battleSummary}\n\n` +
         `🎉 Hai sconfitto *${monster.name}*!\n` +
         `🏆 XP guadagnata: ${xpGain}\n` +
-        `🎁 Oggetti ottenuti: ${drops.map(d => d.name).join(', ') || "Nessuno"}`, {
-        chat_id: chatIdActive,
-        message_id: messageId,
-        parse_mode: "Markdown",
-        reply_markup: optsBackToMain.reply_markup
-    });
+        `🎁 Oggetti ottenuti: ${drops.map(d => d.name).join(', ') || "Nessuno"}`,
+        options: {
+            reply_markup: optsBackToMain.reply_markup,
+            parse_mode: "Markdown"
+        }
+        });
 
 
     let totalXp = (account.xp || 0) + xpGain;
@@ -1073,17 +1226,17 @@ function calculateDrops(dropsArray) {
 }
 
 function handleDefeat(userId, messageId, monster, monsterLevel, chatIdActive, battleSummary) {
-    bot.editMessageText(
-        `${battleSummary}\n\n` +
+    enqueueRequest(userId,{
+        chatId: chatIdActive,
+        messageId: messageId,
+        text: `${battleSummary}\n\n` +
         `💀 Sei stato sconfitto da *${monster.name} (Livello ${monsterLevel})*!\n` +
         `Prova a potenziarti e riprova la prossima volta.`,
-        {
-            chat_id: chatIdActive,
-            message_id: messageId,
-            parse_mode: "Markdown",
-            reply_markup: optsBackToMain.reply_markup
+        options: {
+            reply_markup: optsBackToMain.reply_markup,
+            parse_mode: "Markdown"
         }
-    );
+    });
 }
 
 
@@ -1123,10 +1276,13 @@ function handleItemsCommand(chatId, messageId, userId, page = 1) {
         .then(account => {
             const { items } = account;
             if (!items || items.length === 0) {
-                return bot.editMessageText('Non hai oggetti.', {
-                    chat_id: chatId,
-                    message_id: messageId,
-                    reply_markup: optsBackToMain.reply_markup
+                return enqueueRequest(userId,{
+                    chatId,
+                    messageId,
+                    text: 'Non hai oggetti.',
+                    options: {
+                        reply_markup: optsBackToMain.reply_markup
+                    }
                 });
             }
 
@@ -1139,18 +1295,24 @@ function handleItemsCommand(chatId, messageId, userId, page = 1) {
             const replyMarkup = JSON.parse(optsBackToMain.reply_markup);
             replyMarkup.inline_keyboard = [paginationButtons, ...replyMarkup.inline_keyboard];
 
-            bot.editMessageText(message, {
-                chat_id: chatId,
-                message_id: messageId,
-                reply_markup: replyMarkup
+            enqueueRequest(userId,{
+                chatId,
+                messageId,
+                text: message,
+                options: {
+                    reply_markup: replyMarkup
+                }
             });
         })
         .catch(error => {
             console.log('Errore durante il recupero degli oggetti:', error);
-            bot.editMessageText('Si è verificato un errore durante il recupero degli oggetti. Si prega di riprovare più tardi.', {
-                chat_id: chatId,
-                message_id: messageId,
-                reply_markup: optsBackToMain.reply_markup
+            enqueueRequest(userId,{
+                chatId,
+                messageId,
+                text: 'Si è verificato un errore durante il recupero degli oggetti. Si prega di riprovare più tardi.',
+                options: {
+                    reply_markup: optsBackToMain.reply_markup
+                }
             });
         });;
 
@@ -1160,9 +1322,9 @@ function handleItemsCommand(chatId, messageId, userId, page = 1) {
 
 async function createAdventure(adventureData) {
     try {
-      const docRef = await addDoc(collection(database, "adventures"), adventureData);
-      console.log("Avventura creata con ID:", docRef.id);
+        const docRef = await addDoc(collection(database, "adventures"), adventureData);
+        console.log("Avventura creata con ID:", docRef.id);
     } catch (e) {
-      console.error("Errore nell'inserire l'avventura nel database: ", e);
+        console.error("Errore nell'inserire l'avventura nel database: ", e);
     }
-  }
+}
